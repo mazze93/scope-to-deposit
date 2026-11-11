@@ -39,9 +39,10 @@ code, li, dd { overflow-wrap: anywhere; }
 .price strong { display: block; font: 2.3rem/1 var(--display); }
 .price span { color: var(--muted); font-size: .86rem; }
 .steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 17px 0 24px; padding: 0; list-style: none; gap: 12px; }
-.steps li { display: flex; align-items: center; gap: .45rem; padding: 8px 0; border-bottom: 2px solid var(--rule); color: var(--muted); font-size: .85rem; }
-.steps li[data-done] { border-color: var(--green-ink); }
-.steps li[aria-current] { color: var(--ink); border-color: var(--navy); font-weight: 750; }
+.steps li { min-width: 0; }
+.steps button { display: flex; justify-content: start; align-items: center; gap: .45rem; width: 100%; padding: 8px 0; border: 0; border-bottom: 2px solid var(--rule); border-radius: 0; color: var(--muted); background: transparent; font-size: .85rem; font-weight: 400; text-align: left; }
+.steps li[data-done] button { border-color: var(--green-ink); }
+.steps button[aria-selected="true"] { color: var(--ink); border-color: var(--navy); font-weight: 750; }
 .step-number { font-variant-numeric: tabular-nums; font-size: .72rem; }
 .grid { display: grid; grid-template-columns: minmax(0, 1.33fr) minmax(0, 1fr); gap: 20px; align-items: start; }
 .panel { min-width: 0; border: 1px solid var(--rule); border-radius: 12px; padding: clamp(18px, 3vw, 30px); background: var(--surface); }
@@ -115,7 +116,7 @@ button:disabled { opacity: .65; cursor: wait; }
   .price { padding-left: 0; border: 0; }
   .price strong { display: inline; margin-right: .35rem; font-size: 1.65rem; }
   .steps { gap: 7px; }
-  .steps li { display: block; font-size: .76rem; }
+  .steps button { display: block; font-size: .76rem; }
   .step-number { display: block; }
   .buyer-facts { grid-template-columns: 1fr; }
 }
