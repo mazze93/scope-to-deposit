@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scope to Deposit</title>
+<style>
+:root{color-scheme:dark;--bg:#151814;--panel:#1e221d;--line:#383f34;--text:#f3f2e7;--muted:#b8c0b1;--mint:#caf197}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 system-ui,sans-serif}main{max-width:1060px;margin:auto;padding:clamp(22px,5vw,64px)}header{padding-bottom:22px;border-bottom:1px solid var(--line);margin-bottom:24px}h1,h2{font-family:Georgia,serif;font-weight:normal;margin:0}h1{font-size:clamp(2.8rem,8vw,5rem);line-height:1}h2{font-size:1.65rem}p{color:var(--muted)}.tag,code{color:var(--mint);overflow-wrap:anywhere}.tag{font:13px ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase}.grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:18px}section{min-width:0;padding:20px;background:var(--panel);border:1px solid var(--line);border-radius:12px}label{display:block;margin:10px 0}input,textarea{width:100%;margin-top:4px;background:var(--bg);color:var(--text);border:1px solid #5c6856;border-radius:5px;padding:9px;font:inherit}button{border:1px solid var(--mint);background:var(--mint);color:#182411;border-radius:5px;padding:8px 12px;font:inherit;cursor:pointer}button:disabled{opacity:.55;cursor:default}button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid white;outline-offset:3px}a{color:var(--mint)}form{margin:14px 0}.status{display:inline-block;border:1px solid #e7be7b;color:#e7be7b;padding:4px 9px;border-radius:5px}.status.ready{color:var(--mint);border-color:var(--mint)}#message{min-height:1.55em;color:#ffca9d}li{overflow-wrap:anywhere;margin:.25rem 0}#checks{list-style:none;padding:0}#checks li{padding:7px 0;border-bottom:1px solid var(--line)}#checks small{display:block;color:var(--muted)}details{margin:12px 0}summary{cursor:pointer;color:var(--mint)}#payment-evidence li{font:14px/1.5 ui-monospace,monospace}footer{margin-top:20px;color:var(--muted);font-size:.9rem}@media(max-width:700px){.grid{grid-template-columns:1fr}}
+</style>
+<main>
+<header><p class="tag">PayPal Sandbox · Operator demo</p><h1>Scope to Deposit</h1><p>GitHub Repository Hardening Sprint · $1,250 engagement · $625 deposit</p></header>
+<p id="message" role="status" aria-live="polite"></p>
+<div class="grid">
+<section>
+<h2>Scope review</h2>
+<form id="inquiry">
+<label for="sample">Sample inquiry</label>
+<textarea id="sample" name="inquiry" rows="5" maxlength="4000" required>Please harden release checks for example/demo. GitHub Actions currently passes on main. We need required checks before our customer review.</textarea>
+<button>Draft with AI</button>
+</form>
+<div id="scope"></div>
+<form id="review" hidden>
+<label>Repository <input name="repository" required></label>
+<label>Scope approver <input name="approver" required></label>
+<label>Current CI baseline <input name="ciBaseline" required></label>
+<button>Approve this version</button>
+</form>
+<p><a id="buyer-link" target="_blank" rel="noopener noreferrer" hidden>Open buyer scope for acceptance</a></p>
+</section>
+<section>
+<h2>Kickoff decision</h2>
+<p><strong id="decision" class="status">On hold</strong></p>
+<ul id="checks"></ul>
+<details id="payment-details" hidden><summary>Inspect payment evidence</summary><ul id="payment-evidence"></ul></details>
+<form id="access" hidden>
+<label>Repository access reference <input name="receipt" required></label>
+<button>Confirm access</button>
+</form>
+<form id="draft" hidden>
+<label>Sandbox buyer email <input name="email" type="email" required></label>
+<button>Create $625 PayPal draft</button>
+</form>
+<form id="send" hidden><button>Approve sending by share link</button></form>
+<p id="invoice"></p>
+<p><a id="pay" target="_blank" rel="noopener noreferrer" hidden>Open the PayPal Sandbox invoice</a></p>
+</section>
+</div>
+<footer>The buyer accepts the reviewed scope. The operator confirms repository access. PayPal supplies payment evidence.</footer>
+</main>
+<script>
+const operator = '__OPERATOR__';
+const byId = id => document.getElementById(id);
+let state = {};
+let active = false;
+let sequence = 0;
+const money = cents => new Intl.NumberFormat('en-US', { style:'currency', currency:'USD' }).format(cents / 100);
+function append(parent, tag, value) {
+  const node = document.createElement(tag);
+  node.textContent = value;
+  parent.append(node);
+  return node;
+}
+function render(next) {
+  state = next;
+  const { scope, review, acceptance, access, invoice, deposit, ready, paypalConfigured } = state;
+  byId('decision').textContent = ready ? 'Ready to schedule' : 'On hold';
+  byId('decision').classList.toggle('ready', ready);
+  const checks = byId('checks');
+  checks.replaceChildren();
+  function check(label, detail) {
+    const row = append(checks, 'li', '');
+    append(row, 'strong', label);
+    append(row, 'small', detail);
+  }
+  check(acceptance ? 'Scope accepted' : 'Scope acceptance pending',
+    acceptance ? 'Buyer accepted ' + acceptance.version : 'The buyer needs to accept the reviewed version.');
+  check(access ? 'Access confirmed' : 'Access pending',
+    access ? 'Repository access confirmed.' : 'The operator needs to confirm repository access.');
+  const partial = deposit?.status === 'PARTIALLY_PAID' && deposit.paidCents > 0 && deposit.paidCents < 62500;
+  const paymentDetail = deposit?.settled ? '$625.00 USD reconciled against the PayPal invoice.'
+    : partial ? money(deposit.paidCents) + ' paid · ' + money(62500 - deposit.paidCents) + ' remaining'
+    : deposit ? 'PayPal reports ' + deposit.status.replaceAll('_', ' ').toLowerCase() + '. Kickoff still requires a settled deposit.'
+    : 'Waiting for verified PayPal payment evidence.';
+  check(deposit?.settled ? 'Deposit settled' : 'Deposit pending', paymentDetail);
+  byId('payment-details').hidden = !deposit;
+  const paymentEvidence = byId('payment-evidence');
+  paymentEvidence.replaceChildren();
+  if (deposit) {
+    append(paymentEvidence, 'li', 'PayPal invoice ' + invoice.id);
+    append(paymentEvidence, 'li', 'Scope ' + scope.version);
+    append(paymentEvidence, 'li', 'Provider status ' + deposit.status);
+    append(paymentEvidence, 'li', 'Verified webhook ' + deposit.eventId);
+  }
+  if (!paypalConfigured) append(checks,'li','Set up the PayPal Sandbox credentials and webhook to enable invoicing.');
+  const container = byId('scope');
+  container.replaceChildren();
+  if (scope) {
+    append(container, 'p', scope.version);
+    const tasks = append(container,'ul','');
+    for (const task of scope.work) append(tasks,'li',task);
+    const evidence = append(container,'ul','');
+    const labels = {repository:'Repository', approver:'Approver', ciBaseline:'CI baseline'};
+    const questions = {
+      repository:'Which GitHub repository is in scope?',
+      approver:'Who can accept the scope on the buyer’s behalf?',
+      ciBaseline:'Which CI checks currently pass on the default branch?',
+    };
+    for (const {field,quote} of scope.evidence) {
+      append(evidence, 'li', labels[field] + ' · ' + (quote ? '“' + quote + '”' : questions[field]));
+    }
+    if (review) append(container, 'p', 'Reviewed for ' + review.repository + ' by the operator. Named approver: ' + review.approver + '. CI: ' + review.ciBaseline + '.');
+  }
+  byId('inquiry').hidden = !!review;
+  byId('review').hidden = !scope || !!review;
+  const buyer = byId('buyer-link');
+  buyer.hidden = !state.buyerToken || !!acceptance;
+  if (state.buyerToken) buyer.href = '/buyer#' + state.buyerToken;
+  byId('access').hidden = !acceptance || !!access;
+  byId('draft').hidden = !acceptance || !paypalConfigured || !!invoice?.id;
+  byId('send').hidden = !invoice?.id || !!invoice.sent;
+  byId('invoice').textContent = invoice?.id ? 'Invoice ' + invoice.id + (invoice.sent ? ' · payable' : ' · draft') : '';
+  const pay = byId('pay');
+  pay.hidden = !invoice?.link;
+  if (invoice?.link) pay.href = invoice.link;
+  else pay.removeAttribute('href');
+}
+async function request(path, body) {
+  const response = await fetch(path, {
+    method: body ? 'POST' : 'GET', headers: {'X-Demo-Operator':operator, 'Content-Type':'application/json'},
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const value = await response.json();
+  if (!response.ok) throw Error(value.error);
+  return value;
+}
+async function refresh() {
+  if (active) return;
+  const id = ++sequence;
+  try {
+    const next = await request('/state');
+    if (!active && id === sequence) render(next);
+  } catch (error) { if (!active) byId('message').textContent = error.message; }
+}
+for (const form of document.querySelectorAll('form')) form.addEventListener('submit', async event => {
+  event.preventDefault();
+  if (active) return;
+  sequence++;
+  active = true;
+  const button = form.querySelector('button');
+  button.disabled = true;
+  byId('message').textContent = 'Working…';
+  try {
+    render(await request('/actions/' + (form.id === 'inquiry' ? 'scope' : form.id), { ...Object.fromEntries(new FormData(form)), version:state.scope?.version }));
+    byId('message').textContent = '';
+  } catch (error) { byId('message').textContent = error.message; }
+  finally { button.disabled = false; active = false; }
+});
+refresh();
+setInterval(refresh, 3000);
+</script>
+</html>

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Review your sprint scope</title>
+<style>
+:root { color-scheme: dark; font: 17px/1.55 system-ui, sans-serif; background: #151814; color: #f3f2e7 }
+main { max-width: 660px; margin: auto; padding: clamp(22px, 5vw, 60px) }
+h1 { font: normal clamp(2.3rem, 7vw, 4rem)/1.1 Georgia, serif }
+code { overflow-wrap: anywhere }
+p { color: #c3cabc }
+button { border: 0; border-radius: 5px; padding: 9px 14px; font: inherit; color: #182411; background: #caf197 }
+button:focus-visible { outline: 2px solid white; outline-offset: 3px }
+</style>
+<main>
+<p>Buyer view · Sandbox demo</p>
+<h1>Review your sprint scope</h1>
+<p>$1,250 engagement · $625 deposit</p>
+<section id="scope" hidden>
+<code id="version"></code>
+<p id="review"></p>
+<ul id="work"></ul>
+<button id="accept" type="button">Accept this version</button>
+</section>
+<p id="status" role="status" aria-live="polite"></p>
+</main>
+<script>
+const token = location.hash.slice(1);
+const status = document.getElementById('status');
+const button = document.getElementById('accept');
+let version;
+async function update(accept = false) {
+  button.disabled = true;
+  try {
+    const response = await fetch('/buyer/scope', {
+      method: accept ? 'POST' : 'GET',
+      headers: {'X-Demo-Buyer': token, 'Content-Type': 'application/json'},
+      body: accept ? JSON.stringify({version}) : undefined,
+    });
+    const data = await response.json();
+    if (!response.ok) throw Error(data.error);
+    version = data.version;
+    document.getElementById('version').textContent = version;
+    document.getElementById('review').textContent = data.review.repository + ' · Approver: ' + data.review.approver + ' · CI: ' + data.review.ciBaseline;
+    document.getElementById('work').replaceChildren(...data.work.map(task => {
+      const item = document.createElement('li');
+      item.textContent = task;
+      return item;
+    }));
+    document.getElementById('scope').hidden = false;
+    button.hidden = data.accepted;
+    status.textContent = data.accepted ? 'This scope version is accepted.' : '';
+  } catch (error) { status.textContent = error.message; }
+  finally { button.disabled = false; }
+}
+button.addEventListener('click', () => update(true));
+update();
+</script>
+</html>
