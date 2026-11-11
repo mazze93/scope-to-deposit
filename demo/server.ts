@@ -14,6 +14,7 @@ const page = html as unknown as string;
 type Scope = Awaited<ReturnType<typeof draftScope>>;
 type Deposit = ReturnType<typeof reconcile> & { eventId: string };
 type Case = {
+  contact?: { name: string; email: string; organization: string };
   scope?: Scope;
   review?: { repository: string; approver: string; ciBaseline: string };
   buyerToken?: string;
@@ -107,9 +108,17 @@ async function action(request: Request, name: string) {
   const body = await request.json().catch(() => null);
   if (!body || typeof body !== 'object' || Array.isArray(body)) return json({ error: 'Expected an object.' }, 400);
   const state = read();
+  if (name === 'contact') {
+    if (state.invoice) throw new Error('The invoice already fixes the billing contact.');
+    const email = field(body, 'email', 254);
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('Enter a valid buyer email.');
+    state.contact = { name: field(body, 'name'), email, organization: field(body, 'organization') };
+    save(state);
+    return json(snapshot(state));
+  }
   if (name === 'scope') {
     if (state.review) throw new Error('This demo case already has a reviewed scope.');
-    save({ scope: await draftScope(field(body, 'inquiry', 4000)) });
+    save({ contact: state.contact, scope: await draftScope(field(body, 'inquiry', 4000)) });
     return json(snapshot(read()));
   }
   if (!state.scope || body.version !== state.scope.version) return json({ error: 'Reload and review the current scope version.' }, 409);

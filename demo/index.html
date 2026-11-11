@@ -20,6 +20,14 @@
 <section class="panel workflow-panel">
 <div id="panel-0" class="workflow-stage" aria-labelledby="step-0">
 <div class="panel-heading"><p class="eyebrow">Engagement</p><h2 id="scope-heading">Scope review</h2></div>
+<form id="contact">
+<h3>Buyer contact</h3>
+<label>Buyer name <input name="name" autocomplete="name" required></label>
+<label>Organization <input name="organization" autocomplete="organization" required></label>
+<label>Buyer email <input name="email" type="email" autocomplete="email" required></label>
+<button>Save buyer contact</button>
+</form>
+<p id="contact-summary"></p>
 <form id="inquiry">
 <label for="sample">Sample inquiry</label>
 <textarea id="sample" name="inquiry" rows="5" maxlength="4000" required>Please harden release checks for example/demo. GitHub Actions currently passes on main. We need required checks before our customer review.</textarea>
@@ -124,6 +132,10 @@ function render(next) {
   state = next;
   if (newlyAccepted && selectedStep === 1) selectStep(2);
   const { scope, review, acceptance, access, invoice, deposit, ready, paypalConfigured } = state;
+  byId('contact').hidden = !!state.contact;
+  byId('contact-summary').textContent = state.contact
+    ? state.contact.name + ' · ' + state.contact.organization + ' · ' + state.contact.email : '';
+  if (state.contact && !byId('draft').elements.email.value) byId('draft').elements.email.value = state.contact.email;
   const decision = ready ? 'Ready to schedule' : 'On hold';
   if (byId('decision').textContent !== decision) byId('decision').textContent = decision;
   const complete = [!!review, !!acceptance, !!access, !!deposit?.settled];
