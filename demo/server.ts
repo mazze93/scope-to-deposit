@@ -6,6 +6,7 @@ import { draftScope } from './scope.ts';
 import html from './index.html' with { type: 'text' };
 import buyerHtml from './buyer.html' with { type: 'text' };
 import workflowCss from './workflow.css' with { type: 'text' };
+import helpHtml from './help.html' with { type: 'text' };
 
 // Bun's HTML module declaration describes the default HTML loader. This import uses the text loader.
 const page = html as unknown as string;
@@ -190,6 +191,7 @@ const server = Bun.serve({
       return new Response(workflowCss as unknown as string, { headers: { 'Content-Type': 'text/css; charset=utf-8' } });
     }
     if (pathname === '/' && request.method === 'GET') return pageResponse(page.replace('__OPERATOR__', operator));
+    if (pathname === '/help' && request.method === 'GET') return pageResponse(helpHtml as unknown as string);
     if (pathname === '/buyer' && request.method === 'GET') return pageResponse(buyerHtml as unknown as string);
     if (pathname === '/buyer/scope') {
       if (request.method === 'GET') return buyer(request);

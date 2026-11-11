@@ -9,16 +9,16 @@
 <div><p class="eyebrow">Operator workspace · PayPal Sandbox</p><h1>Scope to Deposit</h1><p class="subtitle">GitHub Repository Hardening Sprint · $1,250 engagement</p></div>
 <p class="price"><strong>$625</strong><span>Deposit required</span></p>
 </header>
-<ol class="steps" role="tablist" aria-label="Engagement workflow">
-<li role="presentation"><button type="button" role="tab" id="step-0" aria-controls="panel-0" aria-selected="true" tabindex="0"><span class="step-number">01</span> Review scope</button></li>
-<li role="presentation"><button type="button" role="tab" id="step-1" aria-controls="panel-1" aria-selected="false" tabindex="-1"><span class="step-number">02</span> Buyer approval</button></li>
-<li role="presentation"><button type="button" role="tab" id="step-2" aria-controls="panel-2" aria-selected="false" tabindex="-1"><span class="step-number">03</span> Confirm access</button></li>
-<li role="presentation"><button type="button" role="tab" id="step-3" aria-controls="panel-3" aria-selected="false" tabindex="-1"><span class="step-number">04</span> Settle deposit</button></li>
+<ol class="steps" aria-label="Engagement workflow">
+<li><button type="button" id="step-0" aria-controls="panel-0"><span class="step-number">01</span> Review scope</button></li>
+<li><button type="button" id="step-1" aria-controls="panel-1"><span class="step-number">02</span> Buyer approval</button></li>
+<li><button type="button" id="step-2" aria-controls="panel-2"><span class="step-number">03</span> Confirm access</button></li>
+<li><button type="button" id="step-3" aria-controls="panel-3"><span class="step-number">04</span> Settle deposit</button></li>
 </ol>
 <p id="message" role="status" aria-live="polite"></p>
 <div class="grid">
 <section class="panel workflow-panel">
-<div id="panel-0" role="tabpanel" aria-labelledby="step-0">
+<div id="panel-0" class="workflow-stage" aria-labelledby="step-0">
 <div class="panel-heading"><p class="eyebrow">Engagement</p><h2 id="scope-heading">Scope review</h2></div>
 <form id="inquiry">
 <label for="sample">Sample inquiry</label>
@@ -34,12 +34,12 @@
 </form>
 
 </div>
-<div id="panel-1" role="tabpanel" aria-labelledby="step-1" hidden>
+<div id="panel-1" class="workflow-stage" aria-labelledby="step-1">
 <div class="panel-heading"><p class="eyebrow">Engagement</p><h2>Buyer approval</h2></div>
 <p id="approval-guidance"></p>
 <p><a class="action" id="buyer-link" target="_blank" rel="noopener noreferrer" hidden>Open buyer scope for acceptance</a></p>
 </div>
-<div id="panel-2" role="tabpanel" aria-labelledby="step-2" hidden>
+<div id="panel-2" class="workflow-stage" aria-labelledby="step-2">
 <div class="panel-heading"><p class="eyebrow">Engagement</p><h2>Confirm access</h2></div>
 <p id="access-guidance"></p>
 <form id="access" hidden>
@@ -47,7 +47,7 @@
 <button>Confirm access</button>
 </form>
 </div>
-<div id="panel-3" role="tabpanel" aria-labelledby="step-3" hidden>
+<div id="panel-3" class="workflow-stage" aria-labelledby="step-3">
 <div class="panel-heading"><p class="eyebrow">PayPal Sandbox</p><h2>Settle the deposit</h2></div>
 <p id="deposit-guidance"></p>
 <form id="draft" hidden>
@@ -56,6 +56,15 @@
 </form><form id="send" hidden><button>Approve sending by share link</button></form><p id="invoice"></p><p><a class="action" id="pay" target="_blank" rel="noopener noreferrer" hidden>Open the PayPal Sandbox invoice</a></p>
 </div>
 </section>
+<aside class="workflow-divider" aria-label="Workflow tracking">
+<div class="workflow-gauge" role="progressbar" aria-label="Completed workflow requirements" aria-valuemin="0" aria-valuemax="4" aria-valuenow="0">
+<div class="gauge-track"><div id="gauge-fill"></div></div>
+<ol class="gauge-stops">
+<li><span>Scope</span></li><li><span>Approval</span></li><li><span>Access</span></li><li><span>Deposit</span></li>
+</ol>
+</div>
+<p id="gauge-caption">0 of 4 complete</p>
+</aside>
 <section class="panel decision-panel" aria-labelledby="decision-heading">
 <div class="panel-heading decision-heading"><h2 id="decision-heading">Kickoff decision</h2><strong id="decision" class="status" role="status">On hold</strong></div>
 <div class="deposit-progress">
@@ -71,6 +80,11 @@
 
 </section>
 </div>
+<footer class="site-footer">
+<a href="/help">Workflow help</a>
+<a href="https://github.com/mazze93/scope-to-deposit" target="_blank" rel="noopener noreferrer">GitHub repository</a>
+<a href="https://github.com/mazze93/scope-to-deposit/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">License · under review</a>
+</footer>
 </main>
 <script>
 const operator = '__OPERATOR__';
@@ -80,26 +94,23 @@ let active = false;
 let selectedStep = 0;
 let sequence = 0;
 
-const tabs = [...document.querySelectorAll('[role="tab"]')];
+const steps = [...document.querySelectorAll('.steps button')];
 function selectStep(index, focus = false) {
   selectedStep = index;
-  tabs.forEach((tab, position) => {
-    tab.setAttribute('aria-selected', String(position === index));
-    tab.tabIndex = position === index ? 0 : -1;
-    byId('panel-' + position).hidden = position !== index;
+  steps.forEach((step, position) => {
+    if (position === index) step.setAttribute('aria-current', 'location');
+    else step.removeAttribute('aria-current');
   });
-  if (focus) tabs[index].focus();
+  document.querySelectorAll('.gauge-stops li').forEach((stop, position) =>
+    stop.toggleAttribute('data-active', position === index));
+  const panel = byId('panel-' + index);
+  panel.scrollIntoView({ block: 'start', behavior: 'instant' });
+  if (focus) {
+    panel.tabIndex = -1;
+    panel.focus({ preventScroll: true });
+  }
 }
-tabs.forEach((tab, index) => {
-  tab.addEventListener('click', () => selectStep(index));
-  tab.addEventListener('keydown', event => {
-    const next = { ArrowRight: (index + 1) % tabs.length, ArrowLeft: (index + tabs.length - 1) % tabs.length, Home: 0, End: tabs.length - 1 }[event.key];
-    if (next !== undefined) {
-      event.preventDefault();
-      selectStep(next, true);
-    }
-  });
-});
+steps.forEach((step, index) => step.addEventListener('click', () => selectStep(index, true)));
 
 const money = cents => new Intl.NumberFormat('en-US', { style:'currency', currency:'USD' }).format(cents / 100);
 function append(parent, tag, value) {
@@ -122,10 +133,20 @@ function render(next) {
     if (index === current) step.setAttribute('aria-current', 'step');
     else step.removeAttribute('aria-current');
   });
+  const completed = complete.filter(Boolean).length;
+  const gauge = document.querySelector('.workflow-gauge');
+  gauge.setAttribute('aria-valuenow', String(completed));
+  gauge.setAttribute('aria-valuetext', completed + ' of 4 requirements complete');
+  byId('gauge-fill').style.height = (completed / 4 * 100) + '%';
+  byId('gauge-caption').textContent = completed + ' of 4 complete';
+  document.querySelectorAll('.gauge-stops li').forEach((stop, index) => {
+    stop.toggleAttribute('data-done', complete[index]);
+    stop.toggleAttribute('data-active', index === selectedStep);
+  });
   const paid = deposit?.paidCents;
   byId('deposit-progress').value = paid ?? 0;
   byId('deposit-total').textContent = deposit && paid === null ? 'Amount unverified' : money(paid ?? 0) + ' / $625.00';
-  byId('decision').classList.toggle('ready', ready);
+  byId('decision').classList.toggle('ready', !!ready);
   const checks = byId('checks');
   checks.replaceChildren();
   function check(label, detail, done) {
