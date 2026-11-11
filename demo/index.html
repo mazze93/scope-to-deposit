@@ -3,16 +3,22 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Scope to Deposit</title>
-<style>
-:root{color-scheme:dark;--bg:#151814;--panel:#1e221d;--line:#383f34;--text:#f3f2e7;--muted:#b8c0b1;--mint:#caf197}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 system-ui,sans-serif}main{max-width:1060px;margin:auto;padding:clamp(22px,5vw,64px)}header{padding-bottom:22px;border-bottom:1px solid var(--line);margin-bottom:24px}h1,h2{font-family:Georgia,serif;font-weight:normal;margin:0}h1{font-size:clamp(2.8rem,8vw,5rem);line-height:1}h2{font-size:1.65rem}p{color:var(--muted)}.tag,code{color:var(--mint);overflow-wrap:anywhere}.tag{font:13px ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase}.grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:18px}section{min-width:0;padding:20px;background:var(--panel);border:1px solid var(--line);border-radius:12px}label{display:block;margin:10px 0}input,textarea{width:100%;margin-top:4px;background:var(--bg);color:var(--text);border:1px solid #5c6856;border-radius:5px;padding:9px;font:inherit}button{border:1px solid var(--mint);background:var(--mint);color:#182411;border-radius:5px;padding:8px 12px;font:inherit;cursor:pointer}button:disabled{opacity:.55;cursor:default}button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid white;outline-offset:3px}a{color:var(--mint)}form{margin:14px 0}.status{display:inline-block;border:1px solid #e7be7b;color:#e7be7b;padding:4px 9px;border-radius:5px}.status.ready{color:var(--mint);border-color:var(--mint)}#message{min-height:1.55em;color:#ffca9d}li{overflow-wrap:anywhere;margin:.25rem 0}#checks{list-style:none;padding:0}#checks li{padding:7px 0;border-bottom:1px solid var(--line)}#checks small{display:block;color:var(--muted)}details{margin:12px 0}summary{cursor:pointer;color:var(--mint)}#payment-evidence li{font:14px/1.5 ui-monospace,monospace}footer{margin-top:20px;color:var(--muted);font-size:.9rem}@media(max-width:700px){.grid{grid-template-columns:1fr}}
-</style>
+<link rel="stylesheet" href="/workflow.css">
 <main>
-<header><p class="tag">PayPal Sandbox · Operator demo</p><h1>Scope to Deposit</h1><p>GitHub Repository Hardening Sprint · $1,250 engagement · $625 deposit</p></header>
+<header class="masthead">
+<div><p class="eyebrow">Operator workspace · PayPal Sandbox</p><h1>Scope to Deposit</h1><p class="subtitle">GitHub Repository Hardening Sprint · $1,250 engagement</p></div>
+<p class="price"><strong>$625</strong><span>Deposit required</span></p>
+</header>
+<ol class="steps" aria-label="Workflow progress">
+<li><span class="step-number">01</span> Review scope</li>
+<li><span class="step-number">02</span> Buyer approval</li>
+<li><span class="step-number">03</span> Confirm access</li>
+<li><span class="step-number">04</span> Settle deposit</li>
+</ol>
 <p id="message" role="status" aria-live="polite"></p>
 <div class="grid">
-<section>
-<h2>Scope review</h2>
+<section class="panel" aria-labelledby="scope-heading">
+<div class="panel-heading"><p class="eyebrow">Engagement</p><h2 id="scope-heading">Scope review</h2></div>
 <form id="inquiry">
 <label for="sample">Sample inquiry</label>
 <textarea id="sample" name="inquiry" rows="5" maxlength="4000" required>Please harden release checks for example/demo. GitHub Actions currently passes on main. We need required checks before our customer review.</textarea>
@@ -25,11 +31,14 @@
 <label>Current CI baseline <input name="ciBaseline" required></label>
 <button>Approve this version</button>
 </form>
-<p><a id="buyer-link" target="_blank" rel="noopener noreferrer" hidden>Open buyer scope for acceptance</a></p>
+<p><a class="action" id="buyer-link" target="_blank" rel="noopener noreferrer" hidden>Open buyer scope for acceptance</a></p>
 </section>
-<section>
-<h2>Kickoff decision</h2>
-<p><strong id="decision" class="status">On hold</strong></p>
+<section class="panel decision-panel" aria-labelledby="decision-heading">
+<div class="panel-heading decision-heading"><h2 id="decision-heading">Kickoff decision</h2><strong id="decision" class="status" role="status">On hold</strong></div>
+<div class="deposit-progress">
+<label for="deposit-progress"><span>PayPal deposit</span><span id="deposit-total">$0.00 / $625.00</span></label>
+<progress id="deposit-progress" max="62500" value="0"></progress>
+</div>
 <ul id="checks"></ul>
 <details id="payment-details" hidden><summary>Inspect payment evidence</summary><ul id="payment-evidence"></ul></details>
 <form id="access" hidden>
@@ -42,10 +51,9 @@
 </form>
 <form id="send" hidden><button>Approve sending by share link</button></form>
 <p id="invoice"></p>
-<p><a id="pay" target="_blank" rel="noopener noreferrer" hidden>Open the PayPal Sandbox invoice</a></p>
+<p><a class="action" id="pay" target="_blank" rel="noopener noreferrer" hidden>Open the PayPal Sandbox invoice</a></p>
 </section>
 </div>
-<footer>The buyer accepts the reviewed scope. The operator confirms repository access. PayPal supplies payment evidence.</footer>
 </main>
 <script>
 const operator = '__OPERATOR__';
@@ -63,25 +71,37 @@ function append(parent, tag, value) {
 function render(next) {
   state = next;
   const { scope, review, acceptance, access, invoice, deposit, ready, paypalConfigured } = state;
-  byId('decision').textContent = ready ? 'Ready to schedule' : 'On hold';
+  const decision = ready ? 'Ready to schedule' : 'On hold';
+  if (byId('decision').textContent !== decision) byId('decision').textContent = decision;
+  const complete = [!!review, !!acceptance, !!access, !!deposit?.settled];
+  const current = complete.indexOf(false);
+  document.querySelectorAll('.steps li').forEach((step, index) => {
+    step.toggleAttribute('data-done', complete[index]);
+    if (index === current) step.setAttribute('aria-current', 'step');
+    else step.removeAttribute('aria-current');
+  });
+  const paid = deposit?.paidCents;
+  byId('deposit-progress').value = paid ?? 0;
+  byId('deposit-total').textContent = deposit && paid === null ? 'Amount unverified' : money(paid ?? 0) + ' / $625.00';
   byId('decision').classList.toggle('ready', ready);
   const checks = byId('checks');
   checks.replaceChildren();
-  function check(label, detail) {
+  function check(label, detail, done) {
     const row = append(checks, 'li', '');
+    row.toggleAttribute('data-done', done);
     append(row, 'strong', label);
     append(row, 'small', detail);
   }
   check(acceptance ? 'Scope accepted' : 'Scope acceptance pending',
-    acceptance ? 'Buyer accepted ' + acceptance.version : 'The buyer needs to accept the reviewed version.');
+    acceptance ? 'Buyer accepted ' + acceptance.version : 'The buyer needs to accept the reviewed version.', !!acceptance);
   check(access ? 'Access confirmed' : 'Access pending',
-    access ? 'Repository access confirmed.' : 'The operator needs to confirm repository access.');
+    access ? 'Repository access confirmed.' : 'The operator needs to confirm repository access.', !!access);
   const partial = deposit?.status === 'PARTIALLY_PAID' && deposit.paidCents > 0 && deposit.paidCents < 62500;
   const paymentDetail = deposit?.settled ? '$625.00 USD reconciled against the PayPal invoice.'
     : partial ? money(deposit.paidCents) + ' paid · ' + money(62500 - deposit.paidCents) + ' remaining'
     : deposit ? 'PayPal reports ' + deposit.status.replaceAll('_', ' ').toLowerCase() + '. Kickoff still requires a settled deposit.'
     : 'Waiting for verified PayPal payment evidence.';
-  check(deposit?.settled ? 'Deposit settled' : 'Deposit pending', paymentDetail);
+  check(deposit?.settled ? 'Deposit settled' : 'Deposit pending', paymentDetail, !!deposit?.settled);
   byId('payment-details').hidden = !deposit;
   const paymentEvidence = byId('payment-evidence');
   paymentEvidence.replaceChildren();
@@ -95,10 +115,17 @@ function render(next) {
   const container = byId('scope');
   container.replaceChildren();
   if (scope) {
-    append(container, 'p', scope.version);
-    const tasks = append(container,'ul','');
-    for (const task of scope.work) append(tasks,'li',task);
-    const evidence = append(container,'ul','');
+    append(container, 'code', scope.version).className = 'version';
+    const proposed = append(container, 'div', '');
+    proposed.className = 'scope-block';
+    append(proposed, 'h3', 'Proposed work');
+    const tasks = append(proposed, 'ul', '');
+    for (const task of scope.work) append(tasks, 'li', task);
+    const source = append(container, 'div', '');
+    source.className = 'scope-block';
+    append(source, 'h3', 'Inquiry evidence');
+    const evidence = append(source, 'ul', '');
+    evidence.className = 'evidence-list';
     const labels = {repository:'Repository', approver:'Approver', ciBaseline:'CI baseline'};
     const questions = {
       repository:'Which GitHub repository is in scope?',
@@ -106,7 +133,11 @@ function render(next) {
       ciBaseline:'Which CI checks currently pass on the default branch?',
     };
     for (const {field,quote} of scope.evidence) {
-      append(evidence, 'li', labels[field] + ' · ' + (quote ? '“' + quote + '”' : questions[field]));
+      const item = append(evidence, 'li', '');
+      item.toggleAttribute('data-missing', !quote && !review);
+      append(item, 'strong', labels[field]);
+      const detail = quote ? '“' + quote + '”' : review ? 'Confirmed in review: ' + review[field] : questions[field];
+      append(item, 'span', detail);
     }
     if (review) append(container, 'p', 'Reviewed for ' + review.repository + ' by the operator. Named approver: ' + review.approver + '. CI: ' + review.ciBaseline + '.');
   }
@@ -148,12 +179,13 @@ for (const form of document.querySelectorAll('form')) form.addEventListener('sub
   active = true;
   const button = form.querySelector('button');
   button.disabled = true;
-  byId('message').textContent = 'Working…';
+  const buttonLabel = button.textContent;
+  button.textContent = form.id === 'inquiry' ? 'Drafting scope…' : 'Saving…';
   try {
     render(await request('/actions/' + (form.id === 'inquiry' ? 'scope' : form.id), { ...Object.fromEntries(new FormData(form)), version:state.scope?.version }));
     byId('message').textContent = '';
   } catch (error) { byId('message').textContent = error.message; }
-  finally { button.disabled = false; active = false; }
+  finally { button.textContent = buttonLabel; button.disabled = false; active = false; }
 });
 refresh();
 setInterval(refresh, 3000);
