@@ -80,7 +80,7 @@ export function sandbox(config: Credentials, fetcher: typeof fetch = fetch) {
         method: 'POST',
         headers: { 'PayPal-Request-Id': requestId, Prefer: 'return=representation' },
         body: JSON.stringify({
-          detail: { reference: scopeRef, invoice_number: requestId, currency_code: 'USD' },
+          detail: { reference: scopeRef, invoice_number: requestId.slice(0, 24), currency_code: 'USD' },
           primary_recipients: [{ billing_info: { email_address: email } }],
           items: [{ name: 'GitHub Repository Hardening Sprint deposit', quantity: '1', unit_amount: { currency_code: 'USD', value: '625.00' } }],
           configuration: { partial_payment: { allow_partial_payment: true }, allow_tip: false },

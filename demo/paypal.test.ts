@@ -47,3 +47,17 @@ test('uses the Sandbox verification API and rejects missing signature headers be
     'https://api-m.sandbox.paypal.com/v1/notifications/verify-webhook-signature',
   ]);
 });
+
+test('draft keeps the full idempotency key and meets the provider invoice-number limit', async () => {
+  const requestId = 'a'.repeat(32);
+  const fetcher = (async (url: string, init: RequestInit) => {
+    if (url.endsWith('/token')) return Response.json({ access_token: 'fixture' });
+    const body = JSON.parse(init.body as string);
+    expect(new Headers(init.headers).get('PayPal-Request-Id')).toBe(requestId);
+    expect(body.detail.invoice_number).toBe(requestId.slice(0, 24));
+    expect(body.detail.reference).toBe(ref);
+    expect(body.primary_recipients[0].billing_info.email_address).toBe('buyer@example.com');
+    return Response.json({ id });
+  }) as typeof fetch;
+  expect(await sandbox({ clientId: 'client', secret: 'secret', webhookId: 'hook' }, fetcher).draft('buyer@example.com', ref, requestId)).toBe(id);
+});
