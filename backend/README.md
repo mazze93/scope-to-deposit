@@ -21,7 +21,7 @@ Set these environment variables before deployment:
 
 When the PayPal configuration is absent, the service runs with invoicing disabled. Register the exact deployed `/webhooks/paypal` URL for `INVOICING.INVOICE.PAID`, `INVOICING.INVOICE.REFUNDED`, and `INVOICING.INVOICE.CANCELLED`, then redeploy with the registration ID and run the [preflight](../demo/preflight.ts). Do not create a new database or rename the module to deploy an update.
 
-The hosted workspace requires the operator token at `/login`; it establishes an eight-hour HttpOnly, Secure, SameSite=Strict session. The token is never embedded in the hosted HTML. Buyer access uses a random capability in the URL fragment, sent in a request header. Treat those links as private. Responses are not cached and HTML carries a nonce-based CSP and no-referrer policy.
+The hosted workspace requires the operator token at `/login`; it establishes an eight-hour HttpOnly, Secure, SameSite=Strict session. The token is never embedded in the hosted HTML. Buyer access uses a random capability in the URL fragment, sent in a request header. Treat those links as private. Responses are not cached and HTML carries a nonce-based CSP and same-origin referrer policy.
 
 AI can run on the operator's local Ollama instance. Set `SALES_PILOT_URL` and `SALES_PILOT_TOKEN` in the local app environment. The local server sends the model output to Prisma, which validates the structure and exact source quotes and records its provenance as operator-submitted local AI output. All other state, buyer, payment, and kickoff operations run on Prisma. Hosted model inference is not configured in this version.
 

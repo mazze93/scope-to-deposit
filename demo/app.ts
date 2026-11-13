@@ -47,7 +47,7 @@ export function createApp(config: {
     }
     function page(body: string) {
         const nonce = randomBytes(18).toString('base64');
-        return new Response(body.replaceAll('<script>', '<script nonce="' + nonce + '">'), { headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer', 'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY',
+        return new Response(body.replaceAll('<script>', '<script nonce="' + nonce + '">'), { headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'Referrer-Policy': 'same-origin', 'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY',
                 'Content-Security-Policy': `default-src 'none'; script-src 'nonce-${nonce}'; style-src 'self'; style-src-attr 'unsafe-inline'; connect-src 'self'; img-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'` } });
     }
     function session(request: Request) {
