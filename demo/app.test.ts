@@ -71,6 +71,7 @@ test('engagement reaches kickoff only through accepted scope, sent invoice and v
     const after = await f.request('/state');
     expect(after.result.ready).toBe(false);
     expect(after.result.confirmation.active).toBe(false);
+    expect(after.result.confirmation.receipt).toEqual(final.result.confirmation.receipt);
     expect(after.result.events.some((e: any) => e.kind === 'kickoff-confirmed')).toBe(true);
 });
 test('protects operator state, binds acceptance to current version, and fixes contact after review', async () => {

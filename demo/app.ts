@@ -28,7 +28,7 @@ export function confirmation(state: Engagement) {
     if (!state.kickoff)
         return null;
     return { buyer: state.contact, scope: { version: state.scope!.version, work: state.scope!.work, review: state.review },
-        receipt: { invoiceId: state.invoice!.id, paymentIds: state.deposit!.paymentIds, cents: depositCents, currency: 'USD', verifiedAt: state.deposit!.verifiedAt },
+        receipt: state.kickoff.paymentReceipt,
         kickoff: state.kickoff, active: ready(state) };
 }
 export function createApp(config: {
@@ -141,7 +141,7 @@ export function createApp(config: {
                 if (s.kickoff)
                     return;
                 const receipt = ctx.emit('kickoff-confirmed', 'operator', { buyer: s.contact, acceptedScope: s.scope, review: s.review, invoice: s.invoice, payment: s.deposit, access: s.access, nextStep: s.review!.nextStep, contactPoint: s.review!.contactPoint });
-                s.kickoff = { at: receipt.at, receipt: receipt.id, paymentEvent: s.deposit!.eventId, nextStep: s.review!.nextStep, contactPoint: s.review!.contactPoint };
+                s.kickoff = { at: receipt.at, receipt: receipt.id, paymentEvent: s.deposit!.eventId, paymentReceipt: { invoiceId: s.invoice!.id!, paymentIds: [...s.deposit!.paymentIds], cents: depositCents, currency: 'USD', verifiedAt: s.deposit!.verifiedAt }, nextStep: s.review!.nextStep, contactPoint: s.review!.contactPoint };
                 break;
             }
             default: throw new Error('Unknown action.');

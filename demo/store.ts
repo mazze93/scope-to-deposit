@@ -42,6 +42,7 @@ export type Engagement = {
         at: string;
         receipt: string;
         paymentEvent: string;
+        paymentReceipt: { invoiceId: string; paymentIds: string[]; cents: number; currency: string; verifiedAt: string };
         nextStep: string;
         contactPoint: string;
     };
