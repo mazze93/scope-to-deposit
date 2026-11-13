@@ -44,3 +44,9 @@ A real local Ollama draft was saved into hosted Prisma Postgres. Its inquiry quo
 A fresh PayPal invoice fetch returned `SENT`, with no settled payment. The partial-payment sheet is set to $250, but the provider popup is not exposed by the browser connector. The user was asked to complete that Sandbox payment and leave the remaining $375 unpaid so that the on-hold state can be verified. No actual payment or verified payment webhook is claimed yet.
 
 The sanitized provider check is retained in the Revenue release directory as `paypal-sent-invoice-evidence.json`. It excludes credentials and the buyer capability. The public video and hackathon entry remain incomplete; the deadline was missed.
+
+## Update — full Sandbox payment and kickoff verified
+
+The user completed the $250 partial payment and then the remaining $375. Both real PayPal webhook deliveries were verified and followed by independent invoice fetches. The partial state kept readiness false; the final state reconciled $625 USD in two distinct PayPal receipts and opened readiness. The operator then confirmed kickoff in the rendered interface, and the hosted buyer page displayed the complete confirmation. Prisma retained all ten transitions across deployments.
+
+Runtime commit `8ca2881` includes the preserved kickoff payment receipt. See [the integration record](INTEGRATION.md) for the exact scenario, provider references, assertions, and remaining boundaries. The prior unpaid-invoice status above is historical. A completed public video and hackathon entry are still not claimed.
