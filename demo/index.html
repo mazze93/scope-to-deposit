@@ -10,16 +10,17 @@
 <p class="price"><strong>$625</strong><span>Deposit required</span></p>
 </header>
 <ol class="steps" aria-label="Engagement workflow">
-<li><button type="button" id="step-0" aria-controls="panel-0"><span class="step-number">01</span> Review scope</button></li>
-<li><button type="button" id="step-1" aria-controls="panel-1"><span class="step-number">02</span> Buyer approval</button></li>
-<li><button type="button" id="step-2" aria-controls="panel-2"><span class="step-number">03</span> Confirm access</button></li>
-<li><button type="button" id="step-3" aria-controls="panel-3"><span class="step-number">04</span> Settle deposit</button></li>
+<li><button type="button" id="step-0" aria-controls="panel-0"><span class="step-number">01</span> Contact</button></li>
+<li><button type="button" id="step-1" aria-controls="panel-1"><span class="step-number">02</span> Review scope</button></li>
+<li><button type="button" id="step-2" aria-controls="panel-2"><span class="step-number">03</span> Buyer approval</button></li>
+<li><button type="button" id="step-3" aria-controls="panel-3"><span class="step-number">04</span> Send invoice</button></li>
+<li><button type="button" id="step-4" aria-controls="panel-4"><span class="step-number">05</span> Verify payment</button></li>
+<li><button type="button" id="step-5" aria-controls="panel-5"><span class="step-number">06</span> Kickoff</button></li>
 </ol>
 <p id="message" role="status" aria-live="polite"></p>
 <div class="grid">
 <section class="panel workflow-panel">
-<div id="panel-0" class="workflow-stage" aria-labelledby="step-0">
-<div class="panel-heading"><p class="eyebrow">Engagement</p><h2 id="scope-heading">Scope review</h2></div>
+<div id="panel-0" class="workflow-stage" aria-labelledby="step-0"><div class="panel-heading"><p class="eyebrow">Begin with a person</p><h2>Buyer contact</h2></div>
 <form id="contact">
 <h3>Buyer contact</h3>
 <label>Buyer name <input name="name" autocomplete="name" required></label>
@@ -28,6 +29,9 @@
 <button>Save buyer contact</button>
 </form>
 <p id="contact-summary"></p>
+
+</div>
+<div id="panel-1" class="workflow-stage" aria-labelledby="step-1"><div class="panel-heading"><p class="eyebrow">AI draft · human review</p><h2>Review the scope</h2></div>
 <form id="inquiry">
 <label for="sample">Sample inquiry</label>
 <textarea id="sample" name="inquiry" rows="5" maxlength="4000" required>Please harden release checks for example/demo. GitHub Actions currently passes on main. We need required checks before our customer review.</textarea>
@@ -38,40 +42,44 @@
 <label>Repository <input name="repository" required></label>
 <label>Scope approver <input name="approver" required></label>
 <label>Current CI baseline <input name="ciBaseline" required></label>
+<label>Agreed next step <textarea name="nextStep" maxlength="600" required placeholder="Schedule the kickoff and review the first hardening change."></textarea></label>
+<label>Your contact point <input name="contactPoint" maxlength="254" required placeholder="Email or preferred contact channel"></label>
 <button>Approve this version</button>
 </form>
 
+
 </div>
-<div id="panel-1" class="workflow-stage" aria-labelledby="step-1">
-<div class="panel-heading"><p class="eyebrow">Engagement</p><h2>Buyer approval</h2></div>
+<div id="panel-2" class="workflow-stage" aria-labelledby="step-2"><div class="panel-heading"><p class="eyebrow">The buyer decides</p><h2>Accept the scope</h2></div>
 <p id="approval-guidance"></p>
 <p><a class="action" id="buyer-link" target="_blank" rel="noopener noreferrer" hidden>Open buyer scope for acceptance</a></p>
+
 </div>
-<div id="panel-2" class="workflow-stage" aria-labelledby="step-2">
-<div class="panel-heading"><p class="eyebrow">Engagement</p><h2>Confirm access</h2></div>
-<p id="access-guidance"></p>
-<form id="access" hidden>
-<label>Repository access reference <input name="receipt" required></label>
-<button>Confirm access</button>
-</form>
-</div>
-<div id="panel-3" class="workflow-stage" aria-labelledby="step-3">
-<div class="panel-heading"><p class="eyebrow">PayPal Sandbox</p><h2>Settle the deposit</h2></div>
+<div id="panel-3" class="workflow-stage" aria-labelledby="step-3"><div class="panel-heading"><p class="eyebrow">PayPal Sandbox</p><h2>Deliver the invoice</h2></div>
 <p id="deposit-guidance"></p>
 <form id="draft" hidden>
 <label>Sandbox buyer email <input name="email" type="email" required></label>
 <button>Create $625 PayPal draft</button>
-</form><form id="send" hidden><button>Approve sending by share link</button></form><p id="invoice"></p><p><a class="action" id="pay" target="_blank" rel="noopener noreferrer" hidden>Open the PayPal Sandbox invoice</a></p>
+</form><form id="send" hidden><button>Send invoice to buyer</button></form><p id="invoice"></p><p><a class="action" id="pay" target="_blank" rel="noopener noreferrer" hidden>Open the PayPal Sandbox invoice</a></p>
+
+</div>
+<div id="panel-4" class="workflow-stage" aria-labelledby="step-4"><div class="panel-heading"><p class="eyebrow">Evidence before commitment</p><h2>Verify payment and access</h2></div>
+<p>Payment clears only after a verified PayPal event matches the accepted scope and the full $625 deposit.</p><p id="access-guidance"></p>
+<form id="access" hidden>
+<label>Repository access reference <input name="receipt" required></label>
+<button>Confirm access</button>
+</form>
+
+</div>
+<div id="panel-5" class="workflow-stage" aria-labelledby="step-5"><div class="panel-heading"><p class="eyebrow">The engagement begins</p><h2>Confirm kickoff</h2></div>
+<p id="kickoff-guidance">The accepted scope, access, and settled deposit come together here.</p><form id="kickoff" hidden><button>Confirm kickoff</button></form><div id="confirmation"></div>
 </div>
 </section>
 <aside class="workflow-divider" aria-label="Workflow tracking">
-<div class="workflow-gauge" role="progressbar" aria-label="Completed workflow requirements" aria-valuemin="0" aria-valuemax="4" aria-valuenow="0">
+<div class="workflow-gauge" role="progressbar" aria-label="Completed workflow requirements" aria-valuemin="0" aria-valuemax="6" aria-valuenow="0">
 <div class="gauge-track"><div id="gauge-fill"></div></div>
-<ol class="gauge-stops">
-<li><span>Scope</span></li><li><span>Approval</span></li><li><span>Access</span></li><li><span>Deposit</span></li>
-</ol>
+<ol class="gauge-stops"><li><span>Contact</span></li><li><span>Scope</span></li><li><span>Approval</span></li><li><span>Invoice</span></li><li><span>Payment</span></li><li><span>Kickoff</span></li></ol>
 </div>
-<p id="gauge-caption">0 of 4 complete</p>
+<p id="gauge-caption">0 of 6 complete</p>
 </aside>
 <section class="panel decision-panel" aria-labelledby="decision-heading">
 <div class="panel-heading decision-heading"><h2 id="decision-heading">Kickoff decision</h2><strong id="decision" class="status" role="status">On hold</strong></div>
@@ -80,6 +88,7 @@
 <progress id="deposit-progress" max="62500" value="0"></progress>
 </div>
 <ul id="checks"></ul>
+<p id="storage-note"></p><details><summary>Engagement evidence</summary><ol id="event-history"></ol></details>
 <details id="payment-details" hidden><summary>Inspect payment evidence</summary><ul id="payment-evidence"></ul></details>
 
 
@@ -112,12 +121,28 @@ function selectStep(index, focus = false) {
   document.querySelectorAll('.gauge-stops li').forEach((stop, position) =>
     stop.toggleAttribute('data-active', position === index));
   const panel = byId('panel-' + index);
+  document.querySelectorAll('.workflow-stage').forEach((stage, i) => {
+    stage.toggleAttribute('data-folded', i !== index);
+    const toggle = stage.querySelector('.fold-toggle');
+    if (toggle) toggle.setAttribute('aria-expanded', String(i === index));
+    stage.querySelector('.stage-content').inert = i !== index;
+  });
   panel.scrollIntoView({ block: 'start', behavior: 'instant' });
   if (focus) {
     panel.tabIndex = -1;
     panel.focus({ preventScroll: true });
   }
 }
+document.querySelectorAll('.workflow-stage').forEach((stage,index) => {
+  const heading=stage.querySelector('.panel-heading');
+  const toggle=document.createElement('button'); toggle.type='button'; toggle.className='fold-toggle';
+  toggle.setAttribute('aria-expanded',String(index===0)); toggle.setAttribute('aria-controls','stage-content-'+index);
+  while(heading.firstChild) toggle.append(heading.firstChild); heading.append(toggle);
+  const content=document.createElement('div'); content.className='stage-content'; content.id='stage-content-'+index;
+  while(heading.nextSibling) content.append(heading.nextSibling); stage.append(content);
+  content.inert=index!==0; stage.toggleAttribute('data-folded',index!==0);
+  toggle.addEventListener('click',()=>selectStep(index));
+});
 steps.forEach((step, index) => step.addEventListener('click', () => selectStep(index, true)));
 
 const money = cents => new Intl.NumberFormat('en-US', { style:'currency', currency:'USD' }).format(cents / 100);
@@ -130,15 +155,15 @@ function append(parent, tag, value) {
 function render(next) {
   const newlyAccepted = !state.acceptance && next.acceptance;
   state = next;
-  if (newlyAccepted && selectedStep === 1) selectStep(2);
+  if (newlyAccepted && selectedStep === 2) selectStep(3);
   const { scope, review, acceptance, access, invoice, deposit, ready, paypalConfigured } = state;
   byId('contact').hidden = !!state.contact;
   byId('contact-summary').textContent = state.contact
     ? state.contact.name + ' · ' + state.contact.organization + ' · ' + state.contact.email : '';
   if (state.contact && !byId('draft').elements.email.value) byId('draft').elements.email.value = state.contact.email;
-  const decision = ready ? 'Ready to schedule' : 'On hold';
+  const decision = state.kickoff && ready ? 'Kickoff confirmed' : ready ? 'Ready to confirm' : 'On hold';
   if (byId('decision').textContent !== decision) byId('decision').textContent = decision;
-  const complete = [!!review, !!acceptance, !!access, !!deposit?.settled];
+  const complete = [!!state.contact, !!review, !!acceptance, !!invoice?.sent, !!deposit?.settled && !!access, !!state.kickoff && ready];
   const current = complete.indexOf(false);
   document.querySelectorAll('.steps li').forEach((step, index) => {
     step.toggleAttribute('data-done', complete[index]);
@@ -148,13 +173,33 @@ function render(next) {
   const completed = complete.filter(Boolean).length;
   const gauge = document.querySelector('.workflow-gauge');
   gauge.setAttribute('aria-valuenow', String(completed));
-  gauge.setAttribute('aria-valuetext', completed + ' of 4 requirements complete');
-  byId('gauge-fill').style.height = (completed / 4 * 100) + '%';
-  byId('gauge-caption').textContent = completed + ' of 4 complete';
+  gauge.setAttribute('aria-valuetext', completed + ' of 6 requirements complete');
+  byId('gauge-fill').style.height = (completed / 6 * 100) + '%';
+  byId('gauge-caption').textContent = completed + ' of 6 complete';
   document.querySelectorAll('.gauge-stops li').forEach((stop, index) => {
     stop.toggleAttribute('data-done', complete[index]);
     stop.toggleAttribute('data-active', index === selectedStep);
   });
+  byId('storage-note').textContent='Saved in '+state.storage+' · '+state.events.length+' evidence records';
+  const history=byId('event-history'); history.replaceChildren();
+  for(const event of state.events) {
+    const row=append(history,'li',event.kind.replaceAll('-',' ')+' · '+event.actor);
+    append(row,'small',new Date(event.at).toLocaleString());
+  }
+  byId('kickoff').hidden=!ready||!!state.kickoff;
+  byId('kickoff-guidance').textContent=state.kickoff ? (ready?'Kickoff is confirmed. The buyer has this same confirmation at their scope link.':'Payment status changed. Kickoff is on hold; the original confirmation remains in the evidence history.') : ready?'All requirements are verified. Confirm the agreed next step.':'Complete the accepted scope, access, invoice, and verified payment requirements first.';
+  const confirmation=byId('confirmation'); confirmation.replaceChildren();
+  if(state.confirmation) {
+    const c=state.confirmation;
+    append(confirmation,'h3',c.active?'Ready to begin':'Engagement on hold');
+    append(confirmation,'p',c.buyer.name+' · '+c.buyer.organization+' · '+c.buyer.email);
+    append(confirmation,'code',c.scope.version);
+    const tasks=append(confirmation,'ul',''); for(const task of c.scope.work)append(tasks,'li',task);
+    append(confirmation,'p','Payment receipt: '+c.receipt.invoiceId+' · '+money(c.receipt.cents));
+    for(const id of c.receipt.paymentIds)append(confirmation,'code',id);
+    append(confirmation,'p','Next: '+c.kickoff.nextStep);
+    append(confirmation,'p','Contact: '+c.kickoff.contactPoint);
+  }
   const paid = deposit?.paidCents;
   byId('deposit-progress').value = paid ?? 0;
   byId('deposit-total').textContent = deposit && paid === null ? 'Amount unverified' : money(paid ?? 0) + ' / $625.00';
@@ -187,7 +232,7 @@ function render(next) {
     append(paymentEvidence, 'li', 'Verified webhook ' + deposit.eventId);
   }
   byId('approval-guidance').textContent = acceptance
-    ? 'The buyer accepted this scope version. You can confirm repository access next.'
+    ? 'The buyer accepted this scope version. You can send the deposit invoice next.'
     : review ? 'Open the reviewed scope for the buyer to read and accept. Acceptance applies to this exact version.'
     : 'Review and approve the scope in the first step before requesting buyer acceptance.';
   byId('access-guidance').textContent = access
@@ -199,7 +244,7 @@ function render(next) {
     : !paypalConfigured ? 'Configure the PayPal Sandbox credentials and webhook to enable invoicing.'
     : deposit?.settled ? 'The $625 deposit is settled. Check the kickoff decision for all remaining requirements.'
     : invoice?.sent ? 'Open the PayPal Sandbox invoice for payment. Verified payment events update the kickoff decision.'
-    : invoice?.id ? 'Review the invoice, then approve making it payable through its share link.'
+    : invoice?.id ? 'Review the invoice, then send it to the saved buyer contact through PayPal.'
     : 'Create a $625 deposit invoice for the Sandbox buyer, then approve sending it.';
   const container = byId('scope');
   container.replaceChildren();
@@ -234,7 +279,7 @@ function render(next) {
   byId('review').hidden = !scope || !!review;
   const buyer = byId('buyer-link');
   buyer.hidden = !state.buyerToken || !!acceptance;
-  if (state.buyerToken) buyer.href = '/buyer#' + state.buyerToken;
+  if (state.buyerToken) buyer.href = state.buyerUrl || '/buyer#' + state.buyerToken;
   byId('access').hidden = !acceptance || !!access;
   byId('draft').hidden = !acceptance || !paypalConfigured || !!invoice?.id;
   byId('send').hidden = !invoice?.id || !!invoice.sent;
@@ -273,8 +318,11 @@ for (const form of document.querySelectorAll('form')) form.addEventListener('sub
   try {
     render(await request('/actions/' + (form.id === 'inquiry' ? 'scope' : form.id), { ...Object.fromEntries(new FormData(form)), version:state.scope?.version }));
     byId('message').textContent = '';
-    if (form.id === 'review') selectStep(1, true);
-    if (form.id === 'access') selectStep(3, true);
+    if (form.id === 'contact') selectStep(1, true);
+    if (form.id === 'review') selectStep(2, true);
+    if (form.id === 'send') selectStep(4, true);
+    if (form.id === 'access') selectStep(5, true);
+    if (form.id === 'kickoff') selectStep(5, true);
   } catch (error) { byId('message').textContent = error.message; }
   finally { button.textContent = buttonLabel; button.disabled = false; active = false; }
 });

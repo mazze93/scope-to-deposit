@@ -41,7 +41,12 @@ export async function draftScope(inquiry: string, model = 'llama3.1:8b', port = 
   });
   if (!response.ok) throw new Error('The local Ollama model could not draft a scope.');
   const result = await response.json() as { message?: { content?: string } };
-  const draft = JSON.parse(result.message?.content ?? 'null') as Draft | null;
+  return validateDraft(inquiry, JSON.parse(result.message?.content ?? 'null'));
+}
+
+export function validateDraft(inquiry: string, value: unknown) {
+  if (!inquiry.trim() || inquiry.length > 4_000) throw new Error('Enter an inquiry under 4,000 characters.');
+  const draft = value as Draft | null;
   if (!draft || !Array.isArray(draft.work) || draft.work.length < 1 || draft.work.length > 3 ||
       !draft.work.every(task => typeof task === 'string' && task.trim() && task.length <= 400)) {
     throw new Error('The local model returned an invalid scope draft.');

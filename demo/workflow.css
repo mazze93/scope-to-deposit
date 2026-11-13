@@ -154,3 +154,37 @@ button:disabled { opacity: .65; cursor: wait; }
   .decision-panel { position: static; }
   .gauge-stops span, #gauge-caption { display: none; }
 }
+
+/* Completed and upcoming sheets retain a visible edge; every stage can unfold. */
+.steps { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.workflow-panel { padding: 0; border: 0; background: transparent; perspective: 1400px; }
+.workflow-stage { position: relative; margin: 0 !important; padding: 24px !important; border: 1px solid var(--rule); border-radius: 3px 3px 12px 12px; background: var(--surface); box-shadow: 0 3px 0 #e4e0d5, 0 6px 0 -1px #eeeae0; transform-origin: center top; }
+.workflow-stage + .workflow-stage { margin-top: 14px !important; }
+.workflow-stage .panel-heading { margin: 0; }
+.fold-toggle { display: block; width: 100%; padding: 0 32px 0 0; border: 0; background: transparent; color: var(--ink); text-align: left; position: relative; }
+.fold-toggle::after { content: '−'; position: absolute; right: 0; top: 10px; color: var(--muted); font-weight: 400; }
+.fold-toggle[aria-expanded=false]::after { content: '+'; }
+.fold-toggle:hover { filter: none; }
+.stage-content { margin-top: 18px; }
+.workflow-stage[data-folded] { padding-block: 17px !important; background: linear-gradient(160deg, var(--surface) 78%, #ede8db 79%, #f8f4e9 83%); }
+.workflow-stage[data-folded] h2 { font-size: 1.45rem; }
+.workflow-stage[data-folded] .stage-content { display: none; }
+#event-history { padding-left: 1.2rem; font-size: .8rem; color: var(--on-dark-muted); max-height: 280px; overflow: auto; }
+#event-history li { padding-bottom: .6rem; }
+#event-history small { display: block; }
+#storage-note { font-size: .75rem; color: var(--on-dark-muted); padding-top: .8rem; }
+#confirmation { overflow-wrap: anywhere; }
+#confirmation code { display: block; font-size: .8rem; }
+#confirmation-details { overflow-wrap: anywhere; }
+@media (prefers-reduced-motion: no-preference) {
+ .stage-content { animation: unfold .38s cubic-bezier(.2,.7,.2,1) both; transform-origin: top; }
+ .workflow-stage { transition: background .25s, box-shadow .25s; }
+ #gauge-fill { transition: height .45s ease; }
+ @keyframes unfold { from { opacity: 0; transform: rotateX(-12deg) translateY(-8px); } to { opacity: 1; transform: none; } }
+}
+@media(max-width:460px){
+ .steps { grid-template-columns: repeat(3,minmax(0,1fr)); }
+ .workflow-stage { padding:18px !important; }
+ .fold-toggle h2 { font-size:1.65rem; }
+ .workflow-stage[data-folded] h2 { font-size:1.25rem; }
+}

@@ -1,0 +1,7 @@
+.env*
+.alchemy/
+.prisma/
+.prisma-composer/
+.composer/
+dist/
+node_modules

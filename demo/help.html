@@ -9,17 +9,19 @@
 <section class="panel">
 <h2>From inquiry to kickoff</h2>
 <ol>
-<li><strong>Review scope.</strong> Draft proposed work from a sample inquiry. Check each quoted fact and confirm the repository, scope approver, and current CI baseline. Approving the review creates the version the buyer will accept.</li>
-<li><strong>Buyer approval.</strong> Open the buyer review link. The buyer reads the agreed work and accepts that version.</li>
-<li><strong>Confirm access.</strong> Record a reference showing that the operator has the repository access needed to deliver the scope.</li>
-<li><strong>Settle the deposit.</strong> Create a $625 USD PayPal Sandbox invoice and approve making it payable through the share link. The buyer pays through PayPal. Verified payment events update the decision.</li>
+<li><strong>Contact.</strong> Save the buyer's name, organization, and Sandbox email.</li>
+<li><strong>Reviewed scope.</strong> AI proposes work and quotes source facts. The operator resolves missing facts and records the next step and contact point. These become part of the version the buyer accepts.</li>
+<li><strong>Buyer acceptance.</strong> Share the private buyer link. Acceptance records the exact reviewed version. Link possession identifies the accepting session; it is not independent identity verification.</li>
+<li><strong>Invoice delivery.</strong> Create the $625 USD Sandbox invoice for the saved buyer. Approve sending it through PayPal. The event records PayPal's accepted send operation; it does not prove the buyer read an email.</li>
+<li><strong>Verified payment.</strong> The app verifies the webhook signature and fetches the invoice. Partial, pending, manual, refunded, mismatched, and duplicate payments cannot satisfy the full-deposit gate. Confirm repository access with an evidence reference.</li>
+<li><strong>Kickoff confirmation.</strong> Once all requirements pass, confirm kickoff. Both screens show the buyer, accepted scope, payment receipt, next step, and contact point.</li>
 </ol>
 <p>The divider gauge counts completed requirements. Viewing a stage moves its navigation marker. A partial payment leaves the deposit requirement pending, and the payment bar shows the amount PayPal reports.</p>
-<p>Kickoff becomes ready when scope acceptance, access, and the exact settled deposit are confirmed.</p>
+<p>Kickoff becomes ready when scope acceptance, invoice delivery, access, and the exact settled deposit are confirmed. A later refund puts the engagement on hold while preserving the original confirmation in history. Click any folded sheet to revisit it. Reduced-motion preferences disable unfolding animation.</p>
 </section>
 <section class="panel">
 <h2>Sandbox setup</h2>
-<p>Use synthetic inquiries and PayPal Sandbox accounts. Configure the local app credentials, webhook registration, and separate webhook listener using the repository instructions.</p>
+<p>Use synthetic inquiries and PayPal Sandbox accounts. Use the local operator app with Ollama, connected to the Prisma service. Prisma Compute serves buyer links and the webhook; Prisma Postgres stores the engagement and append-only transition history. A standalone SQLite mode remains available for local development.</p>
 <p><a href="https://github.com/mazze93/scope-to-deposit/blob/main/demo/README.md">Read the setup guide on GitHub</a></p>
 <h3>License under review</h3>
 <p>The repository currently contains the MIT license. The owner is reviewing licensing options. The license file records the current published terms.</p>

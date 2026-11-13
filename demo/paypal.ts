@@ -93,7 +93,7 @@ export function sandbox(config: Credentials, fetcher: typeof fetch = fetch) {
     async send(id: string) {
       await request(invoicePath(id) + '/send', {
         method: 'POST',
-        body: JSON.stringify({ send_to_recipient: false, send_to_invoicer: false }),
+        body: JSON.stringify({ send_to_recipient: true, send_to_invoicer: false }),
       });
     },
     async invoice(id: string) {

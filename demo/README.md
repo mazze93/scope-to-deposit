@@ -1,20 +1,24 @@
-# Scope to Deposit
+# Run Scope to Deposit
 
-An operator demo for independent consultants. The example engagement is a $1,250 GitHub Repository Hardening Sprint with a $625 deposit.
+Scope to Deposit carries one synthetic consulting engagement from contact through reviewed scope, buyer acceptance, invoice delivery, verified deposit, and kickoff confirmation. The example is a $1,250 GitHub Repository Hardening Sprint with a $625 USD deposit.
 
-## Run locally
+## Local operator with Prisma backend
 
-1. Install Bun and Ollama. Install the Ollama model with `ollama pull llama3.1:8b`, then start Ollama with `OLLAMA_HOST=127.0.0.1:11435 ollama serve`.
-2. Run `bun server.ts` from this directory and open `http://127.0.0.1:4178`. AI drafting and scope review are available immediately. The app stores one synthetic case in `demo.sqlite`. Set `DEMO_DB` to a new file for another case.
-3. For payment, configure a PayPal Sandbox REST application and a separate sandbox buyer. Copy `.env.example` to `.env.local`, restrict its permissions with `chmod 600 .env.local`, and start the app to open the separate webhook listener on port 4185. Forward HTTPS traffic to the webhook listener only. For a temporary test, run `cloudflared tunnel --url http://127.0.0.1:4185` and register its HTTPS URL with the path `/webhooks/paypal` in the Sandbox application. Subscribe to `INVOICING.INVOICE.PAID`, `INVOICING.INVOICE.REFUNDED`, and `INVOICING.INVOICE.CANCELLED`. Set the Sandbox app credentials and webhook ID in `.env.local`, restart the app, and run `bun preflight.ts YOUR_HTTPS_WEBHOOK_URL` to check the registration and listener. Keep the operator screen on port 4178 on loopback.
-4. Draft the sample scope, confirm the repository, approver, and baseline, and open the buyer scope link in a separate browser tab and accept the displayed version as the synthetic buyer. Back in the operator screen, record a synthetic repository access reference. Draft the $625 invoice for the sandbox buyer, approve sending by share link, and open the sandbox invoice as that buyer.
-5. Pay $250, then check that the case remains on hold after the verified webhook. Pay the remaining $375 and check that the same case changes to ready to schedule after PayPal reports the exact deposit paid.
+1. Install Bun and Ollama. Install `llama3.1:8b`, then start it with `OLLAMA_HOST=127.0.0.1:11435 ollama serve`.
+2. Configure and deploy the [Prisma backend](../backend/README.md). Register its `/webhooks/paypal` route with your PayPal Sandbox app. Run `bun preflight.ts YOUR_HTTPS_WEBHOOK_URL` with the Sandbox credentials and webhook ID loaded.
+3. In this directory, create an ignored `.env.local` with `SALES_PILOT_URL` set to the deployed HTTPS origin and `SALES_PILOT_TOKEN` set to the private operator token. Restrict the file to its owner with `chmod 600 .env.local`. Never paste tokens into issues or commit them.
+4. Run `bun server.ts` and open `http://127.0.0.1:4178`. This local operator screen runs AI drafting through Ollama. It sends the draft and inquiry to your Prisma backend, which validates exact source quotes and persists the engagement and evidence. All subsequent actions also use Prisma. The buyer link points to the hosted service.
+5. Capture the synthetic buyer's name, organization, and PayPal Sandbox email. Draft the scope, review its evidence, and supply the repository, approver, CI baseline, agreed next step, and contact point. Approve that version.
+6. Open the buyer link, review the exact work and next step, and accept it as the synthetic buyer. Back in the operator screen, create the invoice and approve sending it through PayPal.
+7. Pay $250 with the Sandbox buyer. A verified webhook should leave kickoff on hold. Pay the remaining $375. Once the app verifies the full $625 and you confirm repository access, confirm kickoff.
+8. Inspect the buyer confirmation and event history: buyer, accepted scope, invoice and payment IDs, agreed next step, and contact point must agree.
 
-The app uses PayPal's signature verification endpoint and then fetches the tracked invoice. It stores the webhook ID and reconciled case together. Only the matching $625 USD invoice with unique PayPal transactions totaling $625 and a provider status of `PAID` can satisfy the deposit gate. The buyer accepts through a version-bound local link. The operator records access as an attestation. The link is a demo capability and represents possession of the link rather than verified buyer identity.
+The backend sends Sandbox invoices to the saved recipient through PayPal. Its send receipt proves that PayPal accepted the send operation, not inbox delivery. Acceptance is tied to possession of a version-bound link, not verified identity. The UI's evidence history identifies operator attestations, local AI output, buyer acceptance, and provider-verified payment separately.
 
-Run `bun test paypal.test.ts ../model.test.ts` for the fixture and decision-model tests. The demo uses separate local storage and the Sandbox API host. Use synthetic inquiries and sandbox accounts.
+## Standalone local development
 
-- [PayPal Invoicing API](https://developer.paypal.com/api/invoicing/v2/)
-- [PayPal Webhooks API](https://developer.paypal.com/api/webhooks/v1/)
-- [Ollama structured outputs](https://docs.ollama.com/capabilities/structured-outputs)
-- [Cloudflare Quick Tunnels](https://developers.cloudflare.com/tunnel/get-started/quick-tunnels/)
+Omit `SALES_PILOT_URL` to use local SQLite (`engagement.sqlite`, or `DEMO_DB`). This is a separate state store, not Prisma. The prior demo's `demo.sqlite` file is left untouched. To receive webhooks locally, set `DEMO_WEBHOOK_PORT=4185` and expose only that listener through an HTTPS tunnel. Keep the operator port on loopback. Configure the three `PAYPAL_SANDBOX_*` variables from `.env.example` and register the tunnel's `/webhooks/paypal` URL.
+
+Run `bun test` from the repository root. Tests use synthetic provider fixtures and do not constitute a completed PayPal Sandbox payment. Full payment opens kickoff only when the matching invoice and accepted scope report exactly $625 USD in distinct PayPal transactions with `PAID` status. Partial, pending, manually marked paid, and refunded states stay on hold. Duplicate webhooks do not add events twice; refunds preserve history and suspend the current readiness decision.
+
+The six folding sheets are keyboard-operable and respect reduced motion. The divider gauge tracks persisted requirements separately from the currently open sheet. Help, source, and the current license are linked in the footer. MIT remains the published license pending the owner's licensing review.

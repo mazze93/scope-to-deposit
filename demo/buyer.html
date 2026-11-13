@@ -19,8 +19,11 @@
 <h3>Proposed work</h3>
 <ul id="work"></ul>
 <p class="scope-block">Scope version <code id="version"></code></p>
+<h3>Agreed next step</h3><p id="next-step"></p><p id="contact-point"></p><p id="buyer-contact"></p>
 <button id="accept" type="button">Accept this version</button>
 </section>
+<section class="panel" id="buyer-invoice" hidden><h2>Your deposit</h2><p id="invoice-status"></p><a class="action" id="invoice-link" target="_blank" rel="noopener noreferrer">Pay securely with PayPal Sandbox</a></section>
+<section class="panel" id="buyer-confirmation" hidden><h2 id="confirmation-title">Kickoff confirmed</h2><div id="confirmation-details"></div></section>
 <p id="status" role="status" aria-live="polite">Loading the reviewed scope…</p>
 <footer class="site-footer"><a href="/help">Workflow help</a><a href="https://github.com/mazze93/scope-to-deposit">GitHub repository</a><a href="https://github.com/mazze93/scope-to-deposit/blob/main/LICENSE">License · under review</a></footer>
 </main>
@@ -41,6 +44,22 @@ async function update(accept = false) {
     const data = await response.json();
     if (!response.ok) throw Error(data.error);
     version = data.version;
+    document.getElementById('next-step').textContent=data.review.nextStep;
+    document.getElementById('contact-point').textContent='Contact: '+data.review.contactPoint;
+    document.getElementById('buyer-contact').textContent=data.buyer.name+' · '+data.buyer.organization+' · '+data.buyer.email;
+    document.getElementById('buyer-invoice').hidden=!data.invoice;
+    if(data.invoice){
+      document.getElementById('invoice-status').textContent=data.payment?'$625.00 USD payment verified.':'Invoice '+data.invoice.id+' · $625.00 USD deposit';
+      const link=document.getElementById('invoice-link'); link.hidden=!data.invoice.link||!!data.payment; if(data.invoice.link)link.href=data.invoice.link;
+    }
+    document.getElementById('buyer-confirmation').hidden=!data.confirmation;
+    if(data.confirmation){
+      const c=data.confirmation; document.getElementById('confirmation-title').textContent=c.active?'Kickoff confirmed':'Engagement on hold';
+      const content=document.getElementById('confirmation-details'); content.replaceChildren();
+      for(const text of [c.buyer.name+' · '+c.buyer.email,'Accepted scope: '+c.scope.version,...c.scope.work,'Payment receipt: '+c.receipt.invoiceId+' · $625.00 USD',...c.receipt.paymentIds,'Next: '+c.kickoff.nextStep,'Contact: '+c.kickoff.contactPoint,'Confirmed: '+new Date(c.kickoff.at).toLocaleString()]){
+        const p=document.createElement('p');p.textContent=text;content.append(p);
+      }
+    }
     document.getElementById('version').textContent = version;
     document.getElementById('repository').textContent = data.review.repository;
     document.getElementById('approver').textContent = data.review.approver;
@@ -59,5 +78,6 @@ async function update(accept = false) {
 }
 button.addEventListener('click', () => update(true));
 update();
+setInterval(()=>update(),5000);
 </script>
 </html>
